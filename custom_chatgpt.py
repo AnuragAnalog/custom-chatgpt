@@ -62,7 +62,7 @@ else:
     st.markdown('''
         ```
         - 1. Enter API Key + Hit enter
-        You can get the API key from [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)
+        You can get the API key from https://platform.openai.com/account/api-keys
         ```
         ''')
     st.sidebar.warning('API key required to try this app.The API key is not stored in any form.')
