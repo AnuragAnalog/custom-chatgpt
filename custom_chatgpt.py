@@ -3,9 +3,7 @@
 import streamlit as st
 
 from langchain.llms import OpenAI
-from langchain.chains import ConversationChain
-from langchain.chains.conversation.memory import ConversationEntityMemory
-from langchain.chains.conversation.prompt import ENTITY_MEMORY_CONVERSATION_TEMPLATE
+from langchain import chains as chs
 
 # Setting up the page layout
 st.set_page_config(page_title='ChatGPT 🤖', layout='wide')
@@ -50,41 +48,42 @@ if API_KEY:
             )
 
     # Create a ConversationEntityMemory
+    # The k here represents the number of entities to be stored in the memory
     if 'entity_memory' not in st.session_state:
-            st.session_state.entity_memory = ConversationEntityMemory(llm=gpt_api, k=10)
+            st.session_state.entity_memory = chs.conversation.memory.ConversationEntityMemory(llm=gpt_api, k=10)
         
     # Create a ConversationChain
-    Conversation = ConversationChain(
+    Chat = chs.ConversationChain(
             llm=gpt_api, 
-            prompt=ENTITY_MEMORY_CONVERSATION_TEMPLATE,
+            prompt=chs.conversation.prompt.ENTITY_MEMORY_CONVERSATION_TEMPLATE,
             memory=st.session_state.entity_memory
         )  
 else:
     st.markdown('''
         ```
         - 1. Enter API Key + Hit enter
-
-        Your API-key is not stored in any form by this app.
+        You can get the API key from [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)
         ```
         ''')
     st.sidebar.warning('API key required to try this app.The API key is not stored in any form.')
 
 st.sidebar.button("New Chat", on_click=start_chat, type='primary')
 
-user_input = get_text()
-if user_input:
-    output = Conversation.run(input=user_input)  
-    st.session_state["previous_chat"].append(user_input)
-    st.session_state["bot_chat"].append(output)
+my_input = get_text()
+if my_input:
+    gpt_answer = Chat.run(input=my_input)  
+    st.session_state["previous_chat"].append(my_input)
+    st.session_state["bot_chat"].append(gpt_answer)
 
-# Conversation history
+# User Chat
 with st.expander("Conversation", expanded=True):
-    for i in range(len(st.session_state['bot_chat'])-1, -1, -1):
-        st.info(st.session_state["previous_chat"][i],icon="🧐")
-        st.success(st.session_state["bot_chat"][i], icon="🤖")
+    for previous, bot in zip(st.session_state["previous_chat"][::-1], st.session_state["bot_chat"][::-1]):
+        st.info(previous, icon="👤")
+        st.success(bot, icon="🤖")
 
+# Conversation History
 if len(st.session_state['stored_session']) > 0:
     with st.sidebar.expander("History", expanded=False):
-        for i in range(len(st.session_state['stored_session'])-1, -1, -1):
-                st.write(st.session_state['stored_session'][i])
+        for history in st.session_state['stored_session'][::-1]:
+                st.write(history)
         
