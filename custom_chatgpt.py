@@ -4,6 +4,7 @@ import streamlit as st
 
 from langchain.llms import OpenAI
 from langchain import chains as chs
+from langchain.chains.conversation.memory import ConversationEntityMemory
 
 # Setting up the page layout
 st.set_page_config(page_title='ChatGPT 🤖', layout='wide')
@@ -50,7 +51,7 @@ if API_KEY:
     # Create a ConversationEntityMemory
     # The k here represents the number of entities to be stored in the memory
     if 'entity_memory' not in st.session_state:
-            st.session_state.entity_memory = chs.conversation.memory.ConversationEntityMemory(llm=gpt_api, k=10)
+            st.session_state.entity_memory = ConversationEntityMemory(llm=gpt_api, k=10)
         
     # Create a ConversationChain
     Chat = chs.ConversationChain(
